@@ -1,0 +1,45 @@
+<DefaultWindow xmlns="https://spacestation14.io"
+               Title="Communication Crystal"
+               SetSize="420 380"
+               MinSize="380 320">
+    <BoxContainer Orientation="Vertical" Margin="10">
+        <BoxContainer Orientation="Horizontal" Margin="0,0,0,10">
+            <Label Text="Energy: " Margin="0,0,5,0"/>
+            <Label Name="EnergyValueLabel" Text="0/50" Access="Public"/>
+        </BoxContainer>
+
+        <BoxContainer Orientation="Horizontal" Margin="0,0,0,10">
+            <Label Text="Crystal: " Margin="0,0,5,0"/>
+            <Label Name="CrystalStatusValueLabel" Text="Not Inserted" Access="Public"/>
+        </BoxContainer>
+
+        <TextEdit Name="MessageTextBox"
+                 MinSize="0 120"
+                 Margin="0,0,0,10"
+                 Access="Public"/>
+
+        <BoxContainer Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
+            <Button Name="GlobalButton"
+                    Text="Global (25 Energy)"
+                    MinSize="120 30"
+                    Margin="0,0,10,0"
+                    Access="Public"/>
+            <Button Name="LocalButton"
+                    Text="Local (5 Energy)"
+                    MinSize="120 30"
+                    Access="Public"/>
+        </BoxContainer>
+
+        <Button Name="RemoveButton"
+                Text="Remove Crystal"
+                MinSize="0 30"
+                Margin="0,10,0,0"
+                Access="Public"/>
+
+        <Label Name="CooldownLabel"
+               Text=""
+               HorizontalAlignment="Center"
+               Margin="0,5,0,0"
+               Access="Public"/>
+    </BoxContainer>
+</DefaultWindow>
