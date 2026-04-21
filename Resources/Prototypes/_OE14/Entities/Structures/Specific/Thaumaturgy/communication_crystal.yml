@@ -2,7 +2,6 @@
   id: OE14CommunicationCrystal
   parent: BaseStructure
   name: communication crystal
-  description: A magical crystal that allows sending announcements to players. Insert an energy crystal to power it.
   categories: [ ForkFiltered ]
   components:
   - type: Sprite

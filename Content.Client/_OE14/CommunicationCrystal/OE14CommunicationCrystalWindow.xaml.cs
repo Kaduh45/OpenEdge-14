@@ -11,6 +11,7 @@ public sealed partial class OE14CommunicationCrystalWindow : Robust.Client.UserI
 {
     public event Action<bool, string>? OnSendMessage;
     public event Action? OnRemoveCrystal;
+    private const int MaxChars = 500;
 
     public OE14CommunicationCrystalWindow()
     {
@@ -20,6 +21,26 @@ public sealed partial class OE14CommunicationCrystalWindow : Robust.Client.UserI
         GlobalButton.OnPressed += OnGlobalPressed;
         LocalButton.OnPressed += OnLocalPressed;
         RemoveButton.OnPressed += OnRemovePressed;
+        MessageTextBox.OnTextChanged += _ =>
+        {
+            var text = GetMessageText();
+            var length = text.Length;
+
+            CharCountLabel.Text = $"{length} / {MaxChars}";
+
+            if (length > MaxChars)
+            {
+                CharCountLabel.Modulate = Color.Red;
+            }
+            else if (length > 450)
+            {
+                CharCountLabel.Modulate = Color.Yellow;
+            }
+            else
+            {
+                CharCountLabel.Modulate = Color.White;
+            }
+        };
     }
 
     private void OnGlobalPressed(BaseButton.ButtonEventArgs args)
@@ -64,7 +85,7 @@ public sealed partial class OE14CommunicationCrystalWindow : Robust.Client.UserI
     public void UpdateState(OE14CommunicationCrystalUiState state)
     {
         EnergyValueLabel.Text = $"{state.CurrentEnergy}/{state.MaxEnergy}";
-        CrystalStatusValueLabel.Text = state.HasEnergyCrystal ? "Inserted" : "Not Inserted";
+        CrystalStatusValueLabel.Text = state.HasEnergyCrystal ? Loc.GetString("oe14-comm-crystal-inserted") : Loc.GetString("oe14-comm-crystal-not-inserted");
 
         GlobalButton.Disabled = !state.CanSendGlobal;
         LocalButton.Disabled = !state.HasEnergyCrystal;
@@ -72,7 +93,7 @@ public sealed partial class OE14CommunicationCrystalWindow : Robust.Client.UserI
 
         if (state.GlobalCooldown.HasValue)
         {
-            CooldownLabel.Text = $"Global cooldown: {(int)state.GlobalCooldown.Value.TotalSeconds}s";
+            CooldownLabel.Text = $"{Loc.GetString("oe14-comm-crystal-global-cooldown")} {(int) state.GlobalCooldown.Value.TotalSeconds}s";
             GlobalButton.Disabled = true;
         }
         else

@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Server.Chat.Systems;
+using Content.Server.Chat.Managers;
 using Content.Server.UserInterface;
 using Content.Shared._OE14.CommunicationCrystal;
 using Content.Shared._OE14.CommunicationCrystal.Components;
@@ -7,14 +8,15 @@ using Content.Shared._OE14.MagicEnergy.Components;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 using Robust.Shared.Timing;
+using Robust.Shared.Player;
 using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
 using Content.Shared.Popups;
 using Content.Shared.Interaction;
 using Content.Shared.Hands.EntitySystems;
 using Content.Server._OE14.MagicEnergy;
-using Content.Server.Chat.Systems;
 using Content.Shared.Chat;
 
 namespace Content.Server._OE14.CommunicationCrystal;
@@ -23,6 +25,7 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
 {
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly ChatSystem _chat = default!;
+    [Dependency] private readonly IChatManager _chatManager = default!;
     [Dependency] private readonly UserInterfaceSystem _userInterface = default!;
     [Dependency] private readonly SharedContainerSystem _container = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
@@ -46,18 +49,10 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
         if (!_container.TryGetContainer(ent, "OE14CommunicationCrystalStorage", out var container, containerManager))
             return;
 
-        if (container.ContainedEntities.Count == 0)
-        {
-            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-no-crystal"), ent);
-            UpdateUIState(ent);
-            return;
-        }
-
         var crystal = container.ContainedEntities[0];
         _container.Remove(crystal, container);
 
-        _audio.PlayPvs("/Audio/Magic/ethereal_enter.ogg", Transform(ent).Coordinates);
-        _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-removed"), ent);
+        _audio.PlayPvs("/Audio/_OE14/Items/crystal_eject.ogg", Transform(ent).Coordinates);
 
         UpdateUIState(ent);
     }
@@ -75,19 +70,12 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
 
         if (container.ContainedEntities.Count > 0)
         {
-            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-already-has"), ent, args.User);
-            return;
-        }
-
-        if (!HasComp<OE14MagicEnergyContainerComponent>(args.Used))
-        {
-            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-need-energy"), ent, args.User);
+            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-already-has"), ent);
             return;
         }
 
         _container.Insert(args.Used, container);
-        _audio.PlayPvs("/Audio/Magic/ethereal_enter.ogg", Transform(ent).Coordinates);
-        _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-inserted"), ent, args.User);
+        _audio.PlayPvs("/Audio/_OE14/Items/crystal_insert.ogg", Transform(ent).Coordinates);
 
         UpdateUIState(ent);
         args.Handled = true;
@@ -109,7 +97,6 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
 
         if (args.Message.Length > 500)
         {
-            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-message-too-long"), ent);
             return;
         }
 
@@ -120,25 +107,16 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
             return;
 
         var energyCrystal = container.ContainedEntities.Count > 0 ? container.ContainedEntities[0] : EntityUid.Invalid;
-        if (energyCrystal == EntityUid.Invalid)
-        {
-            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-no-crystal"), ent);
-            UpdateUIState(ent);
-            return;
-        }
 
         if (!TryComp<OE14MagicEnergyContainerComponent>(energyCrystal, out var crystalEnergy))
         {
-            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-no-crystal"), ent);
             UpdateUIState(ent);
             return;
         }
 
         if (crystalEnergy.Energy < cost)
         {
-            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-insufficient-energy",
-                ("current", (int)crystalEnergy.Energy),
-                ("required", cost)), ent);
+            _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-insufficient-energy"), ent);
             UpdateUIState(ent);
             return;
         }
@@ -149,13 +127,6 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
             if (cooldown != null)
             {
                 var elapsed = _timing.CurTime - cooldown.Value;
-                if (elapsed.TotalSeconds < OE14CommunicationCrystalComponent.GlobalCooldownSeconds)
-                {
-                    var remaining = OE14CommunicationCrystalComponent.GlobalCooldownSeconds - elapsed.TotalSeconds;
-                    _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-global-cooldown",
-                        ("seconds", (int)remaining)), ent);
-                    return;
-                }
             }
 
             ent.Comp.LastGlobalAnnouncement = _timing.CurTime;
@@ -170,26 +141,30 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
             var message = args.Message.Trim();
 
             var formatted =
-                $"\n" +
-                $"──────────────────────────────\n\n" +
-                $"{message}\n";
+                $"───────────────────────────────────────\n" +
+                $"{message}\n"+
+                $"───────────────────────────────────────\n";
 
-            _chat.DispatchGlobalAnnouncement(formatted, sender, playSound: true);
+            _chat.DispatchGlobalAnnouncement(formatted, $"\n {sender}", playSound: true);
         }
         else
         {
-        var message = args.Message.Trim().ToLower();
+            var message = args.Message.Trim();
+            var formatted = $"[color=#00FF88]{sender}:[/color] [color=#AAFFCC]{message}[/color]";
 
-        // estilo chat simples
-        var formatted = $"{sender}: {message}";
-
-        // sem som
-        _chat.DispatchStationAnnouncement(ent, formatted); // sem o parametro sender 
+            // Anúncio local simples no chat - apenas para o mesmo mapa
+            var mapId = Transform(ent).MapID;
+            if (mapId == MapId.Nullspace)
+            {
+                // Fallback: enviar para todos se não conseguir o mapa
+                _chatManager.ChatMessageToAll(ChatChannel.Local, formatted, formatted, ent, false, true);
+            }
+            else
+            {
+                var filter = Filter.BroadcastMap(mapId);
+                _chatManager.ChatMessageToManyFiltered(filter, ChatChannel.Local, formatted, formatted, ent, false, true, null);
+            }
         }
-
-        _audio.PlayPvs("/Audio/Magic/ethereal_enter.ogg", Transform(ent).Coordinates);
-
-        _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-sent"), ent);
 
         UpdateUIState(ent);
     }
