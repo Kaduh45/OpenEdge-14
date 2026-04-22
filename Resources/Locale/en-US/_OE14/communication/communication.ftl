@@ -1,5 +1,4 @@
 oe14-comm-crystal-insufficient-energy = Insufficient energy.
-oe14-comm-crystal-announcer = Crystal Broadcast
 oe14-comm-crystal-already-has = This device already has an energy crystal.
 oe14-comm-crystal-title = Communication Crystal
 oe14-comm-crystal-energy = Energy:

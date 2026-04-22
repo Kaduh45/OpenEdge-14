@@ -1,5 +1,6 @@
 oe14-comm-crystal-insufficient-energy = Energia insuficiente.
-oe14-comm-crystal-announcer = Crystal Broadcast
+oe14-comm-crystal-guild-sender = Guilda 
+oe14-comm-crystal-guard-sender = Guarda
 oe14-comm-crystal-already-has = Este dispositivo já possui um cristal de energia.
 oe14-comm-crystal-title = Cristal de Comunicação
 oe14-comm-crystal-energy = Energia:

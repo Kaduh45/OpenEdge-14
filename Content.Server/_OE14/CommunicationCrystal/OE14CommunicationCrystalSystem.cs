@@ -5,12 +5,14 @@ using Content.Server.UserInterface;
 using Content.Shared._OE14.CommunicationCrystal;
 using Content.Shared._OE14.CommunicationCrystal.Components;
 using Content.Shared._OE14.MagicEnergy.Components;
+using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Timing;
 using Robust.Shared.Player;
+using Robust.Shared.Utility;
 using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
 using Content.Shared.Popups;
@@ -135,22 +137,24 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
 
         _magicEnergy.ChangeEnergy(energyCrystal, -cost, out var delta, out var overload);
 
-        var sender = Loc.GetString("oe14-comm-crystal-announcer");
+        var sender = ent.Comp.AnnouncementTitle;
         if (args.IsGlobal)
         {
-            var message = args.Message.Trim();
-
+            var message = FormattedMessage.RemoveMarkupPermissive(args.Message.Trim());
+            var senderText = $"Anúncio da {sender}";
             var formatted =
                 $"───────────────────────────────────────\n" +
-                $"{message}\n"+
+                $"{message}\n" +
                 $"───────────────────────────────────────\n";
 
-            _chat.DispatchGlobalAnnouncement(formatted, $"\n {sender}", playSound: true);
+            _chat.DispatchGlobalAnnouncement(formatted, $"\n {senderText}", playSound: true, colorOverride: ent.Comp.AnnouncementColor);
         }
         else
         {
-            var message = args.Message.Trim();
-            var formatted = $"[color=#00FF88]{sender}:[/color] [color=#AAFFCC]{message}[/color]";
+            var message = FormattedMessage.RemoveMarkupPermissive(args.Message.Trim());
+            var senderHex = ent.Comp.SenderColor.ToHex();
+            var localHex = ent.Comp.LocalMessageColor.ToHex();
+            var formatted = $"[color={senderHex}]{sender}:[/color] [color={localHex}]{message}[/color]";
 
             // Anúncio local simples no chat - apenas para o mesmo mapa
             var mapId = Transform(ent).MapID;
