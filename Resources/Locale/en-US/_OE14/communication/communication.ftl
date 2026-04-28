@@ -1,6 +1,8 @@
 oe14-comm-crystal-insufficient-energy = Insufficient energy.
 oe14-comm-crystal-already-has = This device already has an energy crystal.
 oe14-comm-crystal-title = Communication Crystal
+oe14-comm-crystal-announcer = {$sender} Announcement
+oe14-comm-crystal-need-energy = It requires an energy crystal.
 oe14-comm-crystal-energy = Energy:
 oe14-comm-crystal-crystal = Crystal:
 oe14-comm-crystal-inserted = Inserted

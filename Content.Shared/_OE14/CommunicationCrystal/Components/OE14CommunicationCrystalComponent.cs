@@ -23,5 +23,5 @@ public sealed partial class OE14CommunicationCrystalComponent : Component
 
     public const int GlobalCost = 25;
     public const int LocalCost = 5;
-    public const int GlobalCooldownSeconds = 120;
+    public const int GlobalCooldownSeconds = 40;
 }

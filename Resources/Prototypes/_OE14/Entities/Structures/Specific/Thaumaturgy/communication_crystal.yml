@@ -17,7 +17,8 @@
     AnnouncementTitle: "Guilda"
     AnnouncementColor: "#50C878"
     LocalMessageColor: "#7CFC98"
-    SenderColor: "#2ECC71" 
+    SenderColor: "#2ECC71"
+  - type: OE14MagicEnergyExaminable
   - type: ActivatableUI
     key: enum.OE14CommunicationCrystalUiKey.Board
   - type: UserInterface
@@ -26,11 +27,11 @@
         type: OE14CommunicationCrystalBoundUserInterface
   - type: ContainerContainer
     containers:
-      OE14CommunicationCrystalStorage: !type:ContainerSlot
+      crystal_slot: !type:ContainerSlot
         count: 1
         whitelist:
           components:
-          - OE14MagicEnergyContainer
+          - OE14MagicEnergyCrystal
   - type: Fixtures
     fixtures:
       fix1:

@@ -14,9 +14,9 @@
              <Label Name="CharCountLabel" Text="0 / 500"/>
         </BoxContainer>
 
-        <Control MinSize="0 120">
+        <Control MinSize="0 100">
             <TextEdit Name="MessageTextBox"
-                    MinSize="0 120"
+                    MinSize="0 100"
                     Margin="0,0,0,10"
                     Access="Public"/>
         </Control>
