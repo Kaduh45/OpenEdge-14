@@ -136,7 +136,7 @@ public sealed partial class OE14CommunicationCrystalSystem : EntitySystem
             return;
         }
 
-        if (!HasComp<OE14MagicEnergyContainerComponent>(args.Used))
+        if (!HasComp<OE14MagicEnergyCrystalComponent>(args.Used))
         {
             _popup.PopupEntity(Loc.GetString("oe14-comm-crystal-need-energy"), ent, args.User);
             return;
